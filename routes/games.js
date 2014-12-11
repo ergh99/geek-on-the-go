@@ -2,6 +2,7 @@ var http = require("http");
 var util = require("util");
 var express = require('express');
 var router = express.Router();
+var hbs = require("hbs");
 var parseString = require('xml2js').parseString;
 
 var bggRoot = "http://boardgamegeek.com/xmlapi2/thing?id=";
@@ -17,18 +18,25 @@ router.get('/:id', function (req, res) {
         var xmlResp = '';
         response.on('data', function (chunk) { xmlResp += chunk; });
         response.on('end', function () {
-            res.redirect('/');
             parseString(xmlResp, function (err, result) {
-            console.log(util.inspect(result, false, null));
                 if (err) {
-                    console.log(err.message);
-                    res.redirect('/');
+                    res.render('error', {
+                        message: err.message,
+                        error: err
+                    });
                 }
-                res.render('games', { game: {
-                    name: result.items.item[0].name[0].$.value,
-                    objectid: result.items.item[0].$.id,
-                    thumbnail: result.items.item[0].thumbnail
-                }});
+                if (result.items.item) {
+                    res.render('games', { game: {
+                        name: result.items.item[0].name[0].$.value,
+                        objectid: result.items.item[0].$.id,
+                        thumbnail: result.items.item[0].thumbnail
+                    }});
+                } else {
+                    console.log(util.inspect(result, false, null));
+                    res.render('error', {
+                        message: "Game not found"
+                    });
+                }
             });
         });
     });
