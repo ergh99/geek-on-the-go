@@ -7,11 +7,21 @@ var parseString = require('xml2js').parseString;
 
 var bggRoot = "http://boardgamegeek.com/xmlapi2/thing?id=";
 
-hbs.registerHelper('gameURL', function(game) {
-  return "http://boardgamegeek.com/boardgame/" + game.objectid;
+hbs.registerHelper('gameURL', function (game) {
+    if (DEBUG) { console.log(util.inspect(game)); }
+    return "http://boardgamegeek.com/boardgame/" + game.id;
 });
 
-/* GET game page. */
+function extractGameFromBggXml(bggItem) {
+    var game = {};
+    game.id = bggItem.$.id;
+    game.name = bggItem.name[0].$.value;
+    game.thumbnail = bggItem.thumbnail;
+
+    return game;
+}
+
+/* GET games page. */
 router.get('/:id', function (req, res) {
     'use strict';
     http.get(bggRoot + req.params.id, function (response) {
@@ -26,11 +36,8 @@ router.get('/:id', function (req, res) {
                     });
                 }
                 if (result.items.item) {
-                    res.render('games', { game: {
-                        name: result.items.item[0].name[0].$.value,
-                        objectid: result.items.item[0].$.id,
-                        thumbnail: result.items.item[0].thumbnail
-                    }});
+                    var game = extractGameFromBggXml(result.items.item[0]);
+                    res.render('games', { game: game } );
                 } else {
                     console.log(util.inspect(result, false, null));
                     res.render('error', {
