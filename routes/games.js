@@ -6,6 +6,10 @@ var parseString = require('xml2js').parseString;
 
 var bggRoot = "http://boardgamegeek.com/xmlapi2/thing?id=";
 
+hbs.registerHelper('gameURL', function(game) {
+  return "http://boardgamegeek.com/boardgame/" + game.objectid;
+});
+
 /* GET game page. */
 router.get('/:id', function (req, res) {
     'use strict';
@@ -20,7 +24,11 @@ router.get('/:id', function (req, res) {
                     console.log(err.message);
                     res.redirect('/');
                 }
-                res.render('games', { game: { name: result.items.item[0].name[0].$.value, thumbnail: result.items.item[0].thumbnail }});
+                res.render('games', { game: {
+                    name: result.items.item[0].name[0].$.value,
+                    objectid: result.items.item[0].$.id,
+                    thumbnail: result.items.item[0].thumbnail
+                }});
             });
         });
     });
