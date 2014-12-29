@@ -4,11 +4,18 @@ function withAuthenticatedAgent(bggCredentials, callback) {
   var agent = Mechanize.newAgent();
   agent.get({ uri: "http://boardgamegeek.com/login" }, function(err, page) {
     var loginForm = page.form("the_form");
+
+    // mechanize-js has a bug where all the form fields on the page
+    // are included in the POST but when setting an existing field
+    // only the first gets updated, so in the case of duplicates the
+    // latter field's value wins, usually blank. workaround:
+    loginForm.deleteField("username");
+    loginForm.deleteField("password");
     loginForm.setFieldValue("username", bggCredentials.username);
     loginForm.setFieldValue("password", bggCredentials.password);
 
-    loginForm.submit(null, {}, { followAllRedirects: true }, function(err, page) {
-      callback(agent, err, page);
+    loginForm.submit(function(err, page) {
+        callback(agent, err, page);
     });
   });
 };
@@ -19,7 +26,7 @@ function addGameToGeekList(bggCredentials, geeklistId, gameId, callback) {
       var form = page.form("ITEMFORM");
       form.setFieldValue("objectid", gameId);
 
-      form.submit(null, {}, { followAllRedirects: true }, callback);
+      form.submit(callback);
     });
   });
 };

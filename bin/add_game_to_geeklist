@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+var bgg = require("../bgg");
+var arguments = process.argv.slice(2);
+
+if (arguments.length == 4) {
+  username = arguments[0];
+  password = arguments[1];
+  geeklistId = arguments[2];
+  gameId = arguments[3];
+} else {
+  console.log("Missing username, password, geeklist id, and boardgame id.");
+  return;
+}
+
+bgg.addGameToGeekList({ username: username, password: password }, geeklistId, gameId, function(err, page) {
+  console.log(err);
+});
