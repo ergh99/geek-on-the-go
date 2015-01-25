@@ -14,5 +14,7 @@ if (arguments.length == 4) {
 }
 
 bgg.addGameToGeekList({ username: username, password: password }, geeklistId, gameId, function(err, page) {
-  console.log(err);
+  if (err) {
+    console.log(err);
+  }
 });
